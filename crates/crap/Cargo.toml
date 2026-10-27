@@ -1,0 +1,40 @@
+[package]
+name = "crap"
+description = "An extremely fast CRAP score checker for Python, written in Rust."
+keywords = ["python", "coverage", "complexity", "crap", "linter"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+authors.workspace = true
+default-run = "crap"
+
+[[bin]]
+name = "crap"
+path = "src/main.rs"
+
+[dependencies]
+crap_coverage = { workspace = true }
+crap_linter = { workspace = true }
+crap_python = { workspace = true }
+crap_workspace = { workspace = true }
+
+anyhow = { workspace = true }
+clap = { workspace = true }
+colored = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+insta-cmd = { workspace = true }
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

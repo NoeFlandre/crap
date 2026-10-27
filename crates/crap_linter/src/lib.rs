@@ -68,6 +68,9 @@ pub struct FunctionReport {
     pub covered: u32,
     /// The statements that were not executed.
     pub missed_lines: Vec<u32>,
+    /// The missed statements as inclusive line ranges, merging runs of consecutive missed
+    /// statements like coverage.py's "Missing" column.
+    pub missed_ranges: Vec<(u32, u32)>,
     /// Whether the function's file appears in the coverage data.
     pub measured: bool,
     pub score: f64,
@@ -210,6 +213,7 @@ pub fn analyze_file(
                 .filter(|line| !executed.contains(line))
                 .copied()
                 .collect();
+            let missed_ranges = missed_ranges(&own, &executed);
             let total = own.len() as u32;
             let covered = total - missed_lines.len() as u32;
             let coverage_fraction = if total == 0 {
@@ -236,6 +240,7 @@ pub fn analyze_file(
                 statements: total,
                 covered,
                 missed_lines,
+                missed_ranges,
                 measured: coverage.is_some(),
                 score: crap_score(function.complexity, coverage_fraction),
                 suppressed: header.iter().any(|line| is_suppression(line)),
@@ -249,6 +254,25 @@ pub fn analyze_file(
         measured: coverage.is_some(),
         syntax_errors: analysis.syntax_errors,
     }
+}
+
+/// Groups the unexecuted lines among `statements` (sorted) into ranges of consecutive
+/// statements.
+fn missed_ranges(statements: &[u32], executed: &LineSet) -> Vec<(u32, u32)> {
+    let mut ranges: Vec<(u32, u32)> = Vec::new();
+    let mut in_run = false;
+    for &line in statements {
+        if executed.contains(&line) {
+            in_run = false;
+        } else {
+            match ranges.last_mut() {
+                Some((_, end)) if in_run => *end = line,
+                _ => ranges.push((line, line)),
+            }
+            in_run = true;
+        }
+    }
+    ranges
 }
 
 /// Whether a line carries a comment suppressing the CRAP check: `# crap: ignore`, a bare

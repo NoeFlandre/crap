@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/crap_python", "crates/crap_coverage", "crates/crap_workspace", "crates/crap_linter"]
+members = ["crates/*"]
 resolver = "3"
 
 [workspace.package]

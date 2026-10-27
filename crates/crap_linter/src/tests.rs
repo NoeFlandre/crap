@@ -127,6 +127,7 @@ fn raw_coverage_data() {
     assert_eq!(branchy.statements, 8);
     assert_eq!(branchy.covered, 4);
     assert_eq!(branchy.missed_lines, [9, 11, 13, 14]);
+    assert_eq!(branchy.missed_ranges, [(9, 9), (11, 11), (13, 14)]);
     assert_eq!(branchy.coverage(), 0.5);
     assert_eq!(branchy.score, 49.0 * 0.125 + 7.0);
     assert!(branchy.is_crappy(13.0));
