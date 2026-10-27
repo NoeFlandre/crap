@@ -1,0 +1,7 @@
+/target
+*.pyc
+__pycache__/
+/dist
+*.so
+.venv/
+*.snap.new

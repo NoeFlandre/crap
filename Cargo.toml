@@ -1,0 +1,77 @@
+[workspace]
+members = ["crates/crap_python", "crates/crap_coverage", "crates/crap_workspace", "crates/crap_linter"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+homepage = "https://github.com/noeflandre/crap"
+repository = "https://github.com/noeflandre/crap"
+license = "Apache-2.0"
+authors = ["Noé Flandre"]
+
+[workspace.dependencies]
+crap_coverage = { path = "crates/crap_coverage" }
+crap_linter = { path = "crates/crap_linter" }
+crap_python = { path = "crates/crap_python" }
+crap_workspace = { path = "crates/crap_workspace" }
+
+anyhow = "1.0.100"
+clap = { version = "4.5", features = ["derive", "env", "wrap_help"] }
+colored = "3.0"
+globset = "0.4.16"
+ignore = "0.4.23"
+insta = { version = "1.43", features = ["filters", "json"] }
+insta-cmd = "0.7.0"
+quick-xml = "0.42.0"
+rayon = "1.10"
+regex = "1.11"
+ruff_python_ast = "0.0.20"
+ruff_python_parser = "0.0.20"
+ruff_source_file = "0.0.20"
+ruff_text_size = "0.0.20"
+rusqlite = { version = "0.41.0", features = ["bundled"] }
+rustc-hash = "2.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+tempfile = "3.20"
+thiserror = "2.0"
+toml = "1.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -2 }
+# Allowed pedantic lints
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+cast_possible_truncation = "allow"
+cast_precision_loss = "allow"
+similar_names = "allow"
+too_many_lines = "allow"
+float_cmp = "allow"
+# Restriction lints
+dbg_macro = "warn"
+print_stderr = "warn"
+print_stdout = "warn"
+todo = "warn"
+unwrap_used = "warn"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev.package.insta]
+opt-level = 3
+
+[profile.dev.package.similar]
+opt-level = 3

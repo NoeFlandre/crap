@@ -1,0 +1,25 @@
+[package]
+name = "crap_python"
+description = "Static analysis of Python source for crap: functions, cyclomatic complexity and executable lines."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+regex = { workspace = true }
+ruff_python_ast = { workspace = true }
+ruff_python_parser = { workspace = true }
+ruff_source_file = { workspace = true }
+ruff_text_size = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true
