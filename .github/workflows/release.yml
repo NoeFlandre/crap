@@ -1,0 +1,146 @@
+# Build and publish a release when a version tag is pushed.
+#
+# Wheels for every platform go to PyPI (through trusted publishing: configure a `pypi`
+# environment and a trusted publisher for this workflow on pypi.org), and standalone binaries
+# are attached to the GitHub release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to PyPI and create a GitHub release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  PACKAGE_NAME: crap-cli
+
+jobs:
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - name: "Test the sdist"
+        run: |
+          pip install dist/*.tar.gz --force-reinstall
+          crap --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist
+
+  build:
+    name: "build | ${{ matrix.platform.target }}"
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { runner: ubuntu-latest, target: x86_64-unknown-linux-gnu, manylinux: auto }
+          - { runner: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, manylinux: auto }
+          - { runner: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { runner: ubuntu-24.04-arm, target: aarch64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { runner: macos-15-intel, target: x86_64-apple-darwin }
+          - { runner: macos-latest, target: aarch64-apple-darwin }
+          - { runner: windows-latest, target: x86_64-pc-windows-msvc }
+          - { runner: windows-11-arm, target: aarch64-pc-windows-msvc }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: "Build the wheel"
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ matrix.platform.manylinux || 'auto' }}
+          args: --release --locked --out dist
+      - name: "Test the wheel"
+        if: ${{ !contains(matrix.platform.target, 'musl') }}
+        shell: bash
+        run: |
+          pip install dist/*.whl --force-reinstall
+          crap --version
+          python -m crap --version
+      - name: "Archive the binary"
+        shell: bash
+        run: |
+          TARGET=${{ matrix.platform.target }}
+          ARCHIVE=crap-$TARGET
+          mkdir -p "$ARCHIVE"
+          if [[ "$TARGET" == *windows* ]]; then
+            cp "target/$TARGET/release/crap.exe" "$ARCHIVE/"
+            7z a "$ARCHIVE.zip" "$ARCHIVE" > /dev/null
+            sha256sum "$ARCHIVE.zip" > "$ARCHIVE.zip.sha256" 2> /dev/null || shasum -a 256 "$ARCHIVE.zip" > "$ARCHIVE.zip.sha256"
+          else
+            cp "target/$TARGET/release/crap" "$ARCHIVE/"
+            tar czf "$ARCHIVE.tar.gz" "$ARCHIVE"
+            shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.platform.target }}
+          path: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.platform.target }}
+          path: |
+            crap-*.tar.gz
+            crap-*.zip
+            crap-*.sha256
+
+  publish-pypi:
+    name: "publish to PyPI"
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.publish }}
+    needs: [sdist, build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/crap-cli
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  github-release:
+    name: "create GitHub release"
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.publish }}
+    needs: [sdist, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          path: release
+          merge-multiple: true
+      - name: "Extract the release notes"
+        run: |
+          VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          awk -v version="$VERSION" '
+            /^## / { if (found) exit; if ($2 == version) { found = 1; next } }
+            found { print }
+          ' CHANGELOG.md > notes.md
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: notes.md
+          files: release/*
