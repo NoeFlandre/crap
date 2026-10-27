@@ -68,12 +68,8 @@ pub struct Settings {
 /// An error loading the configuration.
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
-    #[error("Failed to read `{path}`: {source}")]
-    Io {
-        path: PathBuf,
-        #[source]
-        source: std::io::Error,
-    },
+    #[error("Failed to read `{path}`: {err}")]
+    Io { path: PathBuf, err: std::io::Error },
     #[error("Failed to parse `{path}`: {message}")]
     Parse { path: PathBuf, message: String },
     #[error("Invalid setting in `{path}`: {message}")]
@@ -88,21 +84,25 @@ impl Settings {
         config_file: Option<&Path>,
         overrides: SettingsOverrides,
     ) -> Result<Self, ConfigError> {
+        // Without a discovered configuration file, the project is rooted at the nearest
+        // `pyproject.toml`, or else the current directory.
+        let default_root = || {
+            cwd.ancestors()
+                .find(|dir| dir.join("pyproject.toml").is_file())
+                .unwrap_or(cwd)
+                .to_path_buf()
+        };
         let (config_file, options, project_root) = if let Some(path) = config_file {
+            // An explicit configuration file (say, a shared `ci/crap.toml`) does not move the
+            // project root.
             let path = cwd.join(path);
             let options = read_options(&path)?.unwrap_or_default();
-            let root = path.parent().unwrap_or(cwd).to_path_buf();
-            (Some(path), options, root)
+            (Some(path), options, default_root())
         } else if let Some((path, options)) = find_config(cwd)? {
             let root = path.parent().unwrap_or(cwd).to_path_buf();
             (Some(path), options, root)
         } else {
-            let root = cwd
-                .ancestors()
-                .find(|dir| dir.join("pyproject.toml").is_file())
-                .unwrap_or(cwd)
-                .to_path_buf();
-            (None, Options::default(), root)
+            (None, Options::default(), default_root())
         };
 
         let threshold = overrides
@@ -183,9 +183,9 @@ pub fn find_config(start: &Path) -> Result<Option<(PathBuf, Options)>, ConfigErr
 /// Reads the options in a configuration file; `None` for a `pyproject.toml` without a
 /// `[tool.crap]` table.
 fn read_options(path: &Path) -> Result<Option<Options>, ConfigError> {
-    let contents = std::fs::read_to_string(path).map_err(|source| ConfigError::Io {
+    let contents = std::fs::read_to_string(path).map_err(|err| ConfigError::Io {
         path: path.to_path_buf(),
-        source,
+        err,
     })?;
     let parse_error = |message: String| ConfigError::Parse {
         path: path.to_path_buf(),

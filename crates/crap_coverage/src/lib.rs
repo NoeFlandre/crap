@@ -93,9 +93,9 @@ pub struct CoverageData {
 impl CoverageData {
     /// Reads coverage data from `path`, detecting its format.
     pub fn read(path: &Path) -> Result<Self, Error> {
-        let contents = std::fs::read(path).map_err(|source| Error::Io {
+        let contents = std::fs::read(path).map_err(|err| Error::Io {
             path: path.to_path_buf(),
-            source,
+            err,
         })?;
         let format = detect_format(&contents).ok_or_else(|| Error::UnknownFormat {
             path: path.to_path_buf(),
@@ -181,12 +181,8 @@ pub fn detect_format(contents: &[u8]) -> Option<Format> {
 /// An error reading coverage data.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Failed to read `{path}`: {source}")]
-    Io {
-        path: PathBuf,
-        #[source]
-        source: std::io::Error,
-    },
+    #[error("Failed to read `{path}`: {err}")]
+    Io { path: PathBuf, err: std::io::Error },
     #[error(
         "`{path}` is not a supported coverage file (expected a coverage.py data file, or a JSON, Cobertura XML or LCOV report)"
     )]
