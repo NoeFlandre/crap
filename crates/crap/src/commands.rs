@@ -97,7 +97,13 @@ fn analyze(args: &SharedArgs, overrides: crap_workspace::SettingsOverrides) -> R
     };
     let files = find_python_files(&paths, &settings);
     for error in &files.errors {
-        warn_user!("{error}");
+        warn_user!(
+            "{}",
+            error.replace(
+                &format!("{}{}", cwd.display(), std::path::MAIN_SEPARATOR),
+                ""
+            )
+        );
     }
     tracing::debug!("Found {} Python files", files.files.len());
     if files.files.is_empty() {
@@ -118,9 +124,6 @@ fn analyze(args: &SharedArgs, overrides: crap_workspace::SettingsOverrides) -> R
         );
     }
     let coverage = CoverageData::read_all(coverage_files.iter().map(PathBuf::as_path))?;
-    for (path, format) in &coverage.sources {
-        tracing::debug!("Read {format} `{}`", path.display());
-    }
 
     let exclude = exclusion_patterns(&coverage_config);
     let analysis_settings = AnalysisSettings {

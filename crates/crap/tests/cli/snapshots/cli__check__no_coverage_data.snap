@@ -1,0 +1,18 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+error: No coverage data found in `[ROOT]`.
+
+  Run your tests with coverage first, for example with `coverage run -m pytest` or
+  `pytest --cov`, or point to a coverage file with `--coverage <FILE>`.

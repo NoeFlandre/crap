@@ -1,0 +1,25 @@
+---
+source: crates/crap/tests/cli/report.rs
+info:
+  program: crap
+  args:
+    - report
+    - "--output-format"
+    - csv
+    - "--sort"
+    - name
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+path,line,function,complexity,coverage,statements,covered,score,crappy
+src/shop/pricing.py,29,Cart.__init__,1,1.0000,1,1,1.0000,false
+src/shop/pricing.py,32,Cart.add,2,0.6667,3,2,2.1481,false
+src/shop/pricing.py,48,Cart.checkout,6,0.0000,11,0,42.0000,true
+src/shop/pricing.py,37,Cart.shipping,5,0.0000,9,0,30.0000,false
+src/shop/pricing.py,8,discount,11,0.3333,15,5,46.8519,true
+src/shop/pricing.py,4,total,2,1.0000,1,1,2.0000,false
+
+----- stderr -----

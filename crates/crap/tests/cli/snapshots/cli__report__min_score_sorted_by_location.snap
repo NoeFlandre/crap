@@ -1,0 +1,25 @@
+---
+source: crates/crap/tests/cli/report.rs
+info:
+  program: crap
+  args:
+    - report
+    - "--min-score"
+    - "2"
+    - "--sort"
+    - location
+    - "--quiet"
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+CRAP  Complexity  Coverage  Function       Location
+ 2.0           2    100.0%  total          src/shop/pricing.py:4
+46.9          11     33.3%  discount       src/shop/pricing.py:8
+ 2.1           2     66.7%  Cart.add       src/shop/pricing.py:32
+30.0           5      0.0%  Cart.shipping  src/shop/pricing.py:37
+42.0           6      0.0%  Cart.checkout  src/shop/pricing.py:48
+
+----- stderr -----

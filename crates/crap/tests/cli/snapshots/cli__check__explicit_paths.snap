@@ -1,0 +1,19 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - concise
+    - src/shop/other.py
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+All checks passed!
+
+----- stderr -----
+warning: 1 file is missing from the coverage data, so its functions count as untested: `src/shop/other.py`. Exclude it, or pass `--unmeasured skip` to ignore it.

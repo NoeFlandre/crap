@@ -318,9 +318,14 @@ impl<'a> Printer<'a> {
                 .iter()
                 .filter(|function| function.is_crappy(self.threshold) && !function.suppressed)
                 .count();
+            let skipped = file
+                .functions
+                .iter()
+                .filter(|function| function.suppressed)
+                .count();
             writeln!(
                 writer,
-                r#"  <testsuite name="{path}" tests="{}" failures="{file_failures}" errors="0" skipped="0">"#,
+                r#"  <testsuite name="{path}" tests="{}" failures="{file_failures}" errors="0" skipped="{skipped}">"#,
                 file.functions.len()
             )?;
             for function in &file.functions {
@@ -343,6 +348,7 @@ impl<'a> Printer<'a> {
                     )?;
                     writeln!(writer, "    </testcase>")?;
                 } else if function.suppressed {
+                    // Suppressed functions are skipped whatever their score.
                     writeln!(
                         writer,
                         r#"    <testcase name="{name}" classname="{path}" file="{path}" line="{}"><skipped message="suppressed"/></testcase>"#,

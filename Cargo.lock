@@ -274,6 +274,7 @@ dependencies = [
  "crap_workspace",
  "insta",
  "insta-cmd",
+ "rusqlite",
  "serde",
  "serde_json",
  "tempfile",

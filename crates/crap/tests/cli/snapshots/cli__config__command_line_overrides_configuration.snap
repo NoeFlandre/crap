@@ -1,0 +1,18 @@
+---
+source: crates/crap/tests/cli/config.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--threshold"
+    - "45"
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+src/shop/pricing.py:8:5: CRAP001 `discount` has a CRAP score of 46.9 (complexity 11, coverage 33.3%, threshold 45)
+Found 1 crappy function out of 6 (threshold: 45).
+
+----- stderr -----

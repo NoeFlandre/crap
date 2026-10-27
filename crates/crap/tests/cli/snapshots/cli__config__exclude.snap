@@ -1,0 +1,15 @@
+---
+source: crates/crap/tests/cli/config.rs
+info:
+  program: crap
+  args:
+    - check
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+All checks passed!
+
+----- stderr -----

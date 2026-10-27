@@ -1,0 +1,20 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - concise
+    - "--threshold"
+    - "10"
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+app.py:14:5: CRAP001 `reported` has a CRAP score of 30.0 (complexity 5, coverage 0.0%, threshold 10)
+Found 1 crappy function out of 2 (threshold: 10).
+
+----- stderr -----

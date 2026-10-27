@@ -1,0 +1,103 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - sarif
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/shop/pricing.py"
+                },
+                "region": {
+                  "endLine": 25,
+                  "startColumn": 5,
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "`discount` has a CRAP score of 46.9 (complexity 11, coverage 33.3%, threshold 30)"
+          },
+          "properties": {
+            "complexity": 11,
+            "coverage": 0.3333333333333333,
+            "function": "discount",
+            "score": 46.85185185185186
+          },
+          "ruleId": "CRAP001"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/shop/pricing.py"
+                },
+                "region": {
+                  "endLine": 59,
+                  "startColumn": 9,
+                  "startLine": 48
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "`Cart.checkout` has a CRAP score of 42.0 (complexity 6, coverage 0.0%, threshold 30)"
+          },
+          "properties": {
+            "complexity": 6,
+            "coverage": 0.0,
+            "function": "Cart.checkout",
+            "score": 42.0
+          },
+          "ruleId": "CRAP001"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/noeflandre/crap",
+          "name": "crap",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The CRAP score combines cyclomatic complexity (comp) and test coverage (cov): comp² × (1 − cov)³ + comp. Functions scoring above the threshold should be tested more thoroughly or simplified."
+              },
+              "helpUri": "https://github.com/noeflandre/crap",
+              "id": "CRAP001",
+              "name": "crappy-function",
+              "shortDescription": {
+                "text": "Function is too complex for how well it is tested"
+              }
+            }
+          ],
+          "version": "[VERSION]"
+        }
+      }
+    }
+  ],
+  "version": "[VERSION]"
+}
+
+----- stderr -----

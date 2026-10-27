@@ -1,0 +1,85 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - json
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+[
+  {
+    "code": "CRAP001",
+    "complexity": 11,
+    "coverage": 0.3333333333333333,
+    "covered": 5,
+    "crappy": true,
+    "end_location": {
+      "row": 25
+    },
+    "filename": "[ROOT]/src/shop/pricing.py",
+    "function": "discount",
+    "location": {
+      "column": 5,
+      "row": 8
+    },
+    "measured": true,
+    "missed_lines": [
+      12,
+      13,
+      14,
+      15,
+      17,
+      19,
+      20,
+      21,
+      22,
+      24
+    ],
+    "score": 46.85185185185186,
+    "statements": 15,
+    "suppressed": false,
+    "threshold": 30.0
+  },
+  {
+    "code": "CRAP001",
+    "complexity": 6,
+    "coverage": 0.0,
+    "covered": 0,
+    "crappy": true,
+    "end_location": {
+      "row": 59
+    },
+    "filename": "[ROOT]/src/shop/pricing.py",
+    "function": "Cart.checkout",
+    "location": {
+      "column": 9,
+      "row": 48
+    },
+    "measured": true,
+    "missed_lines": [
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59
+    ],
+    "score": 42.0,
+    "statements": 11,
+    "suppressed": false,
+    "threshold": 30.0
+  }
+]
+
+----- stderr -----

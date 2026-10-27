@@ -1,0 +1,15 @@
+---
+source: crates/crap/tests/cli/config.rs
+info:
+  program: crap
+  args:
+    - check
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+error: Failed to parse `[ROOT]/pyproject.toml`: [tool.crap]: unknown field `threshhold`, expected one of `threshold`, `coverage`, `exclude`, `extend-exclude`, `respect-gitignore`, `unmeasured`, `output-format`

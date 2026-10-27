@@ -1,0 +1,18 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - github
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+::error title=crap (CRAP001),file=src/shop/pricing.py,line=8,col=5,endLine=25::src/shop/pricing.py:8:5: CRAP001 `discount` has a CRAP score of 46.9 (complexity 11, coverage 33.3%25, threshold 30)
+::error title=crap (CRAP001),file=src/shop/pricing.py,line=48,col=9,endLine=59::src/shop/pricing.py:48:9: CRAP001 `Cart.checkout` has a CRAP score of 42.0 (complexity 6, coverage 0.0%25, threshold 30)
+
+----- stderr -----

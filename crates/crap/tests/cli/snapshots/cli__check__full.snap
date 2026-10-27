@@ -1,0 +1,29 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+src/shop/pricing.py:8:5: CRAP001 `discount` has a CRAP score of 46.9 (threshold: 30)
+  |
+8 | def discount(customer, amount, coupon=None):
+  |     ^^^^^^^^ complexity 11, coverage 33.3% (missed lines 12-17, 19-22, 24)
+  |
+  = help: Cover at least 47% of it with tests, or reduce its complexity
+
+src/shop/pricing.py:48:9: CRAP001 `Cart.checkout` has a CRAP score of 42.0 (threshold: 30)
+   |
+48 |     def checkout(self, payment):
+   |         ^^^^^^^^ complexity 6, coverage 0.0% (missed lines 49-59)
+   |
+   = help: Cover at least 13% of it with tests, or reduce its complexity
+
+Found 2 crappy functions out of 6 (threshold: 30).
+
+----- stderr -----

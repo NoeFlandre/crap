@@ -1,0 +1,24 @@
+---
+source: crates/crap/tests/cli/report.rs
+info:
+  program: crap
+  args:
+    - report
+    - "--top"
+    - "3"
+    - "--sort"
+    - complexity
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+CRAP  Complexity  Coverage  Function       Location
+46.9          11     33.3%  discount       src/shop/pricing.py:8
+42.0           6      0.0%  Cart.checkout  src/shop/pricing.py:48
+30.0           5      0.0%  Cart.shipping  src/shop/pricing.py:37
+
+Showing 3 of 6 matching functions. 6 functions analyzed, 2 above the threshold of 30.
+
+----- stderr -----

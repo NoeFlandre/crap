@@ -1,0 +1,17 @@
+---
+source: crates/crap/tests/cli/report.rs
+info:
+  program: crap
+  args:
+    - report
+    - "--min-score"
+    - "1000"
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+No functions to report.
+
+----- stderr -----

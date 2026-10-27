@@ -1,0 +1,23 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - concise
+    - "--threshold"
+    - "15"
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+src/shop/pricing.py:8:5: CRAP001 `discount` has a CRAP score of 46.9 (complexity 11, coverage 33.3%, threshold 15)
+src/shop/pricing.py:48:9: CRAP001 `Cart.checkout` has a CRAP score of 42.0 (complexity 6, coverage 0.0%, threshold 15)
+tests/test_pricing.py:1:5: CRAP001 `test_all` has a CRAP score of 42.0 (complexity 6, coverage 0.0%, threshold 15)
+Found 3 crappy functions out of 7 (threshold: 15).
+
+----- stderr -----
+warning: 1 file is missing from the coverage data, so its functions count as untested: `tests/test_pricing.py`. Exclude it, or pass `--unmeasured skip` to ignore it.

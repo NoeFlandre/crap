@@ -1,0 +1,50 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - gitlab
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+[
+  {
+    "categories": [
+      "Complexity"
+    ],
+    "check_name": "CRAP001",
+    "description": "`discount` has a CRAP score of 46.9 (complexity 11, coverage 33.3%, threshold 30)",
+    "fingerprint": "d9e1760044e6da3b",
+    "location": {
+      "lines": {
+        "begin": 8,
+        "end": 25
+      },
+      "path": "src/shop/pricing.py"
+    },
+    "severity": "major"
+  },
+  {
+    "categories": [
+      "Complexity"
+    ],
+    "check_name": "CRAP001",
+    "description": "`Cart.checkout` has a CRAP score of 42.0 (complexity 6, coverage 0.0%, threshold 30)",
+    "fingerprint": "f7564b7ed8643e1c",
+    "location": {
+      "lines": {
+        "begin": 48,
+        "end": 59
+      },
+      "path": "src/shop/pricing.py"
+    },
+    "severity": "major"
+  }
+]
+
+----- stderr -----

@@ -1,0 +1,31 @@
+---
+source: crates/crap/tests/cli/check.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--output-format"
+    - junit
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="crap" tests="6" failures="2" errors="0">
+  <testsuite name="src/shop/pricing.py" tests="6" failures="2" errors="0" skipped="1">
+    <testcase name="total" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="4"/>
+    <testcase name="discount" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="8">
+      <failure message="`discount` has a CRAP score of 46.9 (threshold: 30)">line 8, col 5: complexity 11, coverage 33.3%</failure>
+    </testcase>
+    <testcase name="Cart.__init__" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="29"/>
+    <testcase name="Cart.add" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="32"/>
+    <testcase name="Cart.shipping" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="37"><skipped message="suppressed"/></testcase>
+    <testcase name="Cart.checkout" classname="src/shop/pricing.py" file="src/shop/pricing.py" line="48">
+      <failure message="`Cart.checkout` has a CRAP score of 42.0 (threshold: 30)">line 48, col 9: complexity 6, coverage 0.0%</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
+
+----- stderr -----

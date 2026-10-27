@@ -1,0 +1,53 @@
+---
+source: crates/crap/tests/cli/report.rs
+info:
+  program: crap
+  args:
+    - report
+    - "--output-format"
+    - json
+    - "--top"
+    - "1"
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+[
+  {
+    "code": "CRAP001",
+    "complexity": 11,
+    "coverage": 0.3333333333333333,
+    "covered": 5,
+    "crappy": true,
+    "end_location": {
+      "row": 25
+    },
+    "filename": "[ROOT]/src/shop/pricing.py",
+    "function": "discount",
+    "location": {
+      "column": 5,
+      "row": 8
+    },
+    "measured": true,
+    "missed_lines": [
+      12,
+      13,
+      14,
+      15,
+      17,
+      19,
+      20,
+      21,
+      22,
+      24
+    ],
+    "score": 46.85185185185186,
+    "statements": 15,
+    "suppressed": false,
+    "threshold": 30.0
+  }
+]
+
+----- stderr -----

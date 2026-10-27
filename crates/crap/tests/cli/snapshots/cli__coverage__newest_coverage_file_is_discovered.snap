@@ -1,0 +1,19 @@
+---
+source: crates/crap/tests/cli/coverage.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--verbose"
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+All checks passed!
+
+----- stderr -----
+DEBUG Project root: `[ROOT]`
+DEBUG Found 2 Python files
+DEBUG Reading coverage.py JSON report from `[ROOT]/coverage.json`

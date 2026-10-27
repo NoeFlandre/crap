@@ -1,0 +1,17 @@
+---
+source: crates/crap/tests/cli/coverage.rs
+info:
+  program: crap
+  args:
+    - check
+    - "--coverage"
+    - coverage.txt
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+error: `[ROOT]/coverage.txt` is not a supported coverage file (expected a coverage.py data file, or a JSON, Cobertura XML or LCOV report)
