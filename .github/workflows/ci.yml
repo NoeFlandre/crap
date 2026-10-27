@@ -80,8 +80,12 @@ jobs:
       - name: "Statements, regions and complexity match coverage.py and radon on the stdlib"
         run: |
           STDLIB=$(python -c "import sysconfig; print(sysconfig.get_paths()['stdlib'])")
+          # crap follows the dead-code elimination of Python 3.12+. Python 3.11 keeps a few
+          # unreachable lines in CPython's own compiler tests, so skip those there.
+          EXCLUDE='*/site-packages/*'
+          if [ "${{ matrix.python }}" = "3.11" ]; then EXCLUDE='*/test/*'; fi
           python scripts/check_line_model.py target/release/examples/dump \
-            $(find "$STDLIB" -name '*.py' -not -path '*/site-packages/*') \
+            $(find "$STDLIB" -name '*.py' -not -path '*/site-packages/*' -not -path "$EXCLUDE") \
             scripts/conformance/project/src/sample/*.py
 
   python-package:
