@@ -142,6 +142,9 @@ def main() -> int:
             a = statements & region.lines
             b = (parser.statements - version_dependent) & region.lines
             known = any(path.endswith(f) and region.name == n for f, n in KNOWN_STATEMENT_DIFFERENCES)
+            # From Python 3.14, coverage.py ignores code objects named `__annotate__` (to hide
+            # the ones the compiler generates for PEP 649), user-defined ones included.
+            known |= sys.version_info >= (3, 14) and region.name.endswith("__annotate__")
             if a != b and not known:
                 failures["statements"].append(
                     (path, region.name, "only crap:", sorted(a - b), "only coverage.py:", sorted(b - a))
