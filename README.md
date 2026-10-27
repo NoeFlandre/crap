@@ -221,6 +221,10 @@ at 1, and each decision point adds to it:
 Nested functions and classes are scored separately and do not add to their parent. Lambdas
 count toward the function that contains them.
 
+Two deliberate departures from radon: `except*` handlers count like `except` handlers (radon
+ignores them), and any irrefutable `case` (`case _:`, `case name:`, `case _ as name:`, or an
+or-pattern ending in one) is recognized as the catch-all, without a guard.
+
 ## Configuration
 
 `crap` reads its settings from the nearest `pyproject.toml` with a `[tool.crap]` table, or a

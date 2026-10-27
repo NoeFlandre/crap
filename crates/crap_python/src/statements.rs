@@ -178,8 +178,11 @@ impl StatementCollector<'_, '_> {
             }
             Stmt::Global(_) | Stmt::Nonlocal(_) | Stmt::IpyEscapeCommand(_) => true,
             Stmt::AnnAssign(assign) => {
-                // A bare annotation of a simple name in a function compiles to nothing.
-                if assign.value.is_some() || !assign.simple || scope != Scope::Function {
+                // A bare annotation of a name in a function compiles to nothing.
+                if assign.value.is_some()
+                    || !assign.target.is_name_expr()
+                    || scope != Scope::Function
+                {
                     self.record(stmt);
                 }
                 true
@@ -238,6 +241,10 @@ impl StatementCollector<'_, '_> {
                 let mut falls_through = false;
                 for case in &match_stmt.cases {
                     self.record(&case.pattern);
+                    // A guard the compiler folds to false makes the body unreachable.
+                    if case.guard.as_deref().and_then(truthiness) == Some(false) {
+                        continue;
+                    }
                     falls_through |= self.block(&case.body, scope);
                     if is_irrefutable(case) {
                         // Later cases are a syntax error; this one catches everything.
@@ -251,6 +258,16 @@ impl StatementCollector<'_, '_> {
                 self.record(stmt);
                 // `assert False` always raises.
                 truthiness(&assert.test) != Some(false)
+            }
+            // `del ()` deletes nothing and compiles to nothing.
+            Stmt::Delete(delete)
+                if delete.targets.iter().all(|target| match target {
+                    Expr::Tuple(tuple) => tuple.is_empty(),
+                    Expr::List(list) => list.is_empty(),
+                    _ => false,
+                }) =>
+            {
+                true
             }
             Stmt::Delete(_)
             | Stmt::TypeAlias(_)

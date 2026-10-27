@@ -355,3 +355,17 @@ async def tasks():
         [("generic".to_string(), 2), ("tasks".to_string(), 2)]
     );
 }
+
+#[test]
+fn statements_that_compile_to_nothing() {
+    let source = r"def f(x):
+    (name): int
+    del ()
+    match x:
+        case 0 if False:
+            never = 1
+        case 0:
+            pass
+";
+    assert_eq!(statements(source), [1, 4, 5, 7, 8]);
+}
