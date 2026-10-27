@@ -188,6 +188,16 @@ pub fn analyze_file(
     options: &AnalysisOptions,
 ) -> FileReport {
     let analysis = analyze(source, options);
+    if !analysis.syntax_errors.is_empty() {
+        // Code that does not parse cannot run, so neither its complexity nor its coverage
+        // means anything.
+        return FileReport {
+            path: path.to_path_buf(),
+            functions: Vec::new(),
+            measured: coverage.is_some(),
+            syntax_errors: analysis.syntax_errors,
+        };
+    }
     let lines: Vec<&str> = source.lines().collect();
 
     let statements = coverage
