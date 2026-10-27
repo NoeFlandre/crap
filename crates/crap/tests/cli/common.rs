@@ -172,10 +172,16 @@ impl TestProject {
     pub(crate) fn settings(&self) -> insta::Settings {
         let mut settings = insta::Settings::clone_current();
         let root = self.root().to_string_lossy().into_owned();
+        // Paths as printed, and as escaped in JSON on Windows.
+        settings.add_filter(&regex_escape(&root.replace('\\', "\\\\")), "[ROOT]");
         settings.add_filter(&regex_escape(&root), "[ROOT]");
         settings.add_filter(&regex_escape(&root.replace('\\', "/")), "[ROOT]");
         if cfg!(windows) {
             settings.add_filter(r"\\\\?([\w\[\]])", "/$1");
+            settings.add_filter(
+                r"The system cannot find the (file|path) specified\.",
+                "No such file or directory",
+            );
         }
         settings.add_filter(r#""version": "\d+\.\d+\.\d+""#, r#""version": "[VERSION]""#);
         settings

@@ -23,14 +23,54 @@ import subprocess
 import sys
 import warnings
 
-from coverage.parser import PythonParser
+from coverage.parser import PythonParser, _case_is_irrefutable
 from coverage.regions import code_regions
 from radon.complexity import cc_visit
 
 DEFAULT_EXCLUDE = r"#\s*(pragma|PRAGMA)[:\s]?\s*(no|NO)\s*(cover|COVER)"
 
-# Known, deliberate differences from radon: crap treats `case _ as name:` as a catch-all.
-RADON_EXCEPTIONS = {("sqlite3/__main__.py", "SqliteInteractiveConsole.runsource")}
+# Functions where CPython's optimizer goes further than crap's model, in its own compiler
+# regression tests.
+KNOWN_STATEMENT_DIFFERENCES = {("test/test_compile.py", "TestSpecifics.test_regression_gh_120225.name_4")}
+
+
+def radon_disagrees(tree: ast.AST) -> set[int]:
+    """The `def` lines of functions where crap deliberately differs from radon.
+
+    radon ignores `except*` handlers, and only recognizes `case _:` and `case name:` as
+    catch-all cases, not `case _ as name:`, or-patterns, or guarded wildcards. crap counts
+    `except*` like `except`, and uses coverage.py's definition of an irrefutable case.
+    """
+    def differs(function: ast.AST) -> bool:
+        for node in ast.walk(function):
+            if type(node).__name__ == "TryStar":
+                return True
+            if isinstance(node, ast.Match):
+                radon = any(getattr(case.pattern, "pattern", False) is None for case in node.cases)
+                ours = any(_case_is_irrefutable(case) for case in node.cases)
+                if radon != ours:
+                    return True
+        return False
+
+    return {
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and differs(node)
+    }
+
+
+def lazy_annotations(tree: ast.AST) -> set[int]:
+    """Lines of bare annotations in class bodies, which compile to nothing from Python 3.14
+    (PEP 649) but to code before. crap follows the older behavior."""
+    if sys.version_info < (3, 14):
+        return set()
+    return {
+        statement.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef)
+        for statement in node.body
+        if isinstance(statement, ast.AnnAssign) and statement.value is None
+    }
 
 
 def radon_complexities(text: str) -> dict[int, int]:
@@ -72,7 +112,9 @@ def main() -> int:
                 parser = PythonParser(text=text, exclude=DEFAULT_EXCLUDE)
                 parser.parse_source()
                 regions = [r for r in code_regions(text) if r.kind == "function"]
-                ast.parse(text)
+                tree = ast.parse(text)
+                skip_complexity = radon_disagrees(tree)
+                version_dependent = lazy_annotations(tree)
         except Exception:  # Not valid Python for this interpreter.
             stats["skipped"] += 1
             continue
@@ -94,11 +136,13 @@ def main() -> int:
         if our_regions != their_regions:
             failures["regions"].append((path, sorted(our_regions ^ their_regions, key=str)[:2]))
 
-        statements = set(ours["statements"])
+        statements = set(ours["statements"]) - version_dependent
         for region in regions:
             stats["functions"] += 1
-            a, b = statements & region.lines, parser.statements & region.lines
-            if a != b:
+            a = statements & region.lines
+            b = (parser.statements - version_dependent) & region.lines
+            known = any(path.endswith(f) and region.name == n for f, n in KNOWN_STATEMENT_DIFFERENCES)
+            if a != b and not known:
                 failures["statements"].append(
                     (path, region.name, "only crap:", sorted(a - b), "only coverage.py:", sorted(b - a))
                 )
@@ -108,12 +152,10 @@ def main() -> int:
         except Exception:
             continue
         for function in ours["functions"]:
-            if function["line"] not in radon:
+            if function["line"] not in radon or function["line"] in skip_complexity:
                 continue
             stats["complexities"] += 1
             if radon[function["line"]] != function["complexity"]:
-                if any(path.endswith(f) and function["name"] == n for f, n in RADON_EXCEPTIONS):
-                    continue
                 failures["complexity"].append(
                     (path, function["name"], function["complexity"], radon[function["line"]])
                 )
