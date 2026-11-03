@@ -25,7 +25,7 @@ jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           command: sdist
@@ -34,7 +34,7 @@ jobs:
         run: |
           pip install dist/*.tar.gz --force-reinstall
           crap --version
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-sdist
           path: dist
@@ -55,8 +55,8 @@ jobs:
           - { runner: windows-latest, target: x86_64-pc-windows-msvc }
           - { runner: windows-11-arm, target: aarch64-pc-windows-msvc }
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
       - name: "Build the wheel"
@@ -87,11 +87,11 @@ jobs:
             tar czf "$ARCHIVE.tar.gz" "$ARCHIVE"
             shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.platform.target }}
           path: dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: binaries-${{ matrix.platform.target }}
           path: |
@@ -110,7 +110,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: wheels-*
           path: dist
@@ -127,8 +127,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: binaries-*
           path: release
@@ -140,7 +140,7 @@ jobs:
             /^## / { if (found) exit; if ($2 == version) { found = 1; next } }
             found { print }
           ' CHANGELOG.md > notes.md
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           body_path: notes.md
           files: release/*
